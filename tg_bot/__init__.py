@@ -57,6 +57,7 @@ if ENV:
     WORKERS = int(os.environ.get('WORKERS', 8))
     BAN_STICKER = os.environ.get('BAN_STICKER', 'CAADAgADOwADPPEcAXkko5EB3YGYAg')
     ALLOW_EXCL = os.environ.get('ALLOW_EXCL', False)
+    START_TEXT = os.environ.get('START_TEXT', None)
 
 else:
     from tg_bot.config import Development as Config
