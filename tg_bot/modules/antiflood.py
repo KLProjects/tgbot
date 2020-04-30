@@ -10,6 +10,7 @@ from tg_bot import dispatcher
 from tg_bot.modules.helper_funcs.chat_status import is_user_admin, user_admin, can_restrict
 from tg_bot.modules.log_channel import loggable
 from tg_bot.modules.sql import antiflood_sql as sql
+from tg_bot.modules.warns import warn_user
 
 FLOOD_GROUP = 3
 
@@ -34,12 +35,13 @@ def check_flood(bot: Bot, update: Update) -> str:
         return ""
 
     try:
-        chat.kick_member(user.id)
+        #chat.kick_member(user.id)
+        warn_user('test warn'
         msg.reply_text("I like to leave the flooding to natural disasters. But you, you were just a "
                        "disappointment. Get out.")
 
         return "<b>{}:</b>" \
-               "\n#BANNED" \
+               "\n#Warn" \
                "\n<b>User:</b> {}" \
                "\nFlooded the group.".format(html.escape(chat.title),
                                              mention_html(user.id, user.first_name))
