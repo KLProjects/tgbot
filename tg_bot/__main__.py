@@ -9,29 +9,14 @@ from telegram.error import Unauthorized, BadRequest, TimedOut, NetworkError, Cha
 from telegram.ext import CommandHandler, Filters, MessageHandler, CallbackQueryHandler
 from telegram.ext.dispatcher import run_async, DispatcherHandlerStop, Dispatcher
 from telegram.utils.helpers import escape_markdown
-
+from tg_bot.modules.helper_funcs.string_handling import button_markdown_parser
 from tg_bot import dispatcher, updater, TOKEN, WEBHOOK, OWNER_ID, DONATION_LINK, CERT_PATH, PORT, URL, LOGGER, \
-    ALLOW_EXCL, START_TEXT
+    ALLOW_EXCL, START_MESSAGE, START_BUTTONS
 # needed to dynamically load modules
 # NOTE: Module order is not guaranteed, specify that in the config file!
 from tg_bot.modules import ALL_MODULES
 from tg_bot.modules.helper_funcs.chat_status import is_user_admin
 from tg_bot.modules.helper_funcs.misc import paginate_modules
-
-PM_START_TEXT = """
-Hi {}, my name is {}! If you have any questions on how to use me, read /help - and then head to @MarieSupport.
-
-I'm a group manager bot built in python3, using the python-telegram-bot library, and am fully opensource; \
-you can find what makes me tick [here](github.com/PaulSonOfLars/tgbot)!
-
-Feel free to submit pull requests on github, or to contact my support group, @MarieSupport, with any bugs, questions \
-or feature requests you might have :)
-I also have a news channel, @MarieNews for announcements on new features, downtime, etc.
-
-You can find the list of available commands with /help.
-
-If you're enjoying using me, and/or would like to help me survive in the wild, hit /donate to help fund/upgrade my VPS!
-"""
 
 HELP_STRINGS = """
 Hey there! My name is *{}*.
@@ -52,10 +37,9 @@ And the following:
 """.format(dispatcher.bot.first_name, "" if not ALLOW_EXCL else "\nAll commands can either be used with / or !.\n")
 
 DONATE_STRING = """Heya, glad to hear you want to donate!
-It took lots of work for my creator to get me to where I am now, and every donation helps \
+It took lots of work for [my creator](https://telegram.dog/SonOfLars) to get me to where I am now, and every donation helps \
 motivate him to make me even better. All the donation money will go to a better VPS to host me, and/or beer \
-(see his bio!). He's just a poor student, so every little helps!
-There are two ways of paying him; [PayPal](paypal.me/PaulSonOfLars), or [Monzo](monzo.me/paulnionvestergaardlarsen)."""
+(see his bio!). He's just a poor student, so every little helps!"""
 
 IMPORTED = {}
 MIGRATEABLE = []
@@ -129,6 +113,17 @@ def test(bot: Bot, update: Update):
 
 @run_async
 def start(bot: Bot, update: Update, args: List[str]):
+    keyboard = None
+    if START_BUTTONS:
+        keyb = []
+        _, buttons = button_markdown_parser(START_BUTTONS)
+        for b_name, url, same_line in buttons:
+            ik = InlineKeyboardButton(b_name, url=url)
+            if same_line and keyb:
+                keyb[-1].append(ik)
+            else:
+                keyb.append([ik])
+        keyboard = InlineKeyboardMarkup(keyb)
     if update.effective_chat.type == "private":
         if len(args) >= 1:
             if args[0].lower() == "help":
@@ -147,12 +142,17 @@ def start(bot: Bot, update: Update, args: List[str]):
                 IMPORTED["rules"].send_rules(update, args[0], from_pm=True)
 
         else:
-            first_name = update.effective_user.first_name
             update.effective_message.reply_text(
-                START_TEXT.format(escape_markdown(first_name), escape_markdown(bot.first_name), OWNER_ID),
-                parse_mode=ParseMode.MARKDOWN)
+                START_MESSAGE,
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=keyboard
+            )
     else:
-        update.effective_message.reply_text("Yo, whadup?")
+        update.effective_message.reply_text(
+            START_MESSAGE,
+            parse_mode=ParseMode.MARKDOWN,
+            reply_markup=keyboard
+        )
 
 
 # for test purposes
@@ -382,7 +382,7 @@ def donate(bot: Bot, update: Update):
     if chat.type == "private":
         update.effective_message.reply_text(DONATE_STRING, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
 
-        if OWNER_ID != 254318997 and DONATION_LINK:
+        if DONATION_LINK:
             update.effective_message.reply_text("You can also donate to the person currently running me "
                                                 "[here]({})".format(DONATION_LINK),
                                                 parse_mode=ParseMode.MARKDOWN)
@@ -415,6 +415,29 @@ def migrate_chats(bot: Bot, update: Update):
     raise DispatcherHandlerStop
 
 
+@run_async
+def kcfrsct_fnc(bot: Bot, update: Update):
+    query = update.callback_query
+    # bot.answer_callback_query(query.id)
+    user = update.effective_user
+    _match = re.match(r"rsct_(.*)_33801", query.data)
+    # ensure no spinny white circle
+    if _match:
+        try:
+            from tg_bot.modules.sql.cust_filters_sql import get_btn_with_di
+            _soqka = get_btn_with_di(int(_match.group(1)))
+            query.answer(
+                text=_soqka.url.replace("\\n", "\n").replace("\\t", "\t"),
+                # HPFPOCWBANER: https://stackoverflow.com/a/42965750
+                show_alert=True
+            )
+        except BadRequest:
+            pass
+        except Exception as e:
+            print(e)
+            bot.answer_callback_query(query.id)
+
+
 def main():
     test_handler = CommandHandler("test", test)
     start_handler = CommandHandler("start", start, pass_args=True)
@@ -436,6 +459,9 @@ def main():
     dispatcher.add_handler(settings_callback_handler)
     dispatcher.add_handler(migrate_handler)
     dispatcher.add_handler(donate_handler)
+    dispatcher.add_handler(
+        CallbackQueryHandler(kcfrsct_fnc, pattern=r"")
+    )
 
     # dispatcher.add_error_handler(error_callback)
 
@@ -456,7 +482,7 @@ def main():
 
     else:
         LOGGER.info("Using long polling.")
-        updater.start_polling(timeout=15, read_latency=4)
+        updater.start_polling(timeout=15, read_latency=4, clean=True)
 
     updater.idle()
 
@@ -475,11 +501,21 @@ def process_update(self, update):
         return
 
     now = datetime.datetime.utcnow()
-    cnt = CHATS_CNT.get(update.effective_chat.id, 0)
 
-    t = CHATS_TIME.get(update.effective_chat.id, datetime.datetime(1970, 1, 1))
+    # this is a "very" rare update
+    # aHR0cHM6Ly90Lm1lL1NwRWNIbERlLzM5Nw==
+    di = None
+    if update.effective_chat is not None:
+        di = update.effective_chat.id
+    else:
+        # temprary, for deebug purposes
+        self.logger.debug(update)
+
+    cnt = CHATS_CNT.get(di, 0)
+
+    t = CHATS_TIME.get(di, datetime.datetime(1970, 1, 1))
     if t and now > t + datetime.timedelta(0, 1):
-        CHATS_TIME[update.effective_chat.id] = now
+        CHATS_TIME[di] = now
         cnt = 0
     else:
         cnt += 1
@@ -487,7 +523,7 @@ def process_update(self, update):
     if cnt > 10:
         return
 
-    CHATS_CNT[update.effective_chat.id] = cnt
+    CHATS_CNT[di] = cnt
     for group in self.groups:
         try:
             for handler in (x for x in self.handlers[group] if x.check_update(update)):

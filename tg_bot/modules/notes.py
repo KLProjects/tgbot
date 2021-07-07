@@ -16,6 +16,8 @@ from tg_bot.modules.helper_funcs.chat_status import user_admin
 from tg_bot.modules.helper_funcs.misc import build_keyboard, revert_buttons
 from tg_bot.modules.helper_funcs.msg_types import get_note_type
 
+from tg_bot.modules.connection import connected
+
 FILE_MATCHER = re.compile(r"^###file_id(!photo)?###:(.*?)(?:\s|$)")
 
 ENUM_FUNC_MAP = {
@@ -33,6 +35,16 @@ ENUM_FUNC_MAP = {
 # Do not async
 def get(bot, update, notename, show_none=True, no_format=False):
     chat_id = update.effective_chat.id
+    chat = update.effective_chat  # type: Optional[Chat]
+    user = update.effective_user  # type: Optional[User]
+    conn = connected(bot, update, chat, user.id, need_admin=False)
+    if not conn == False:
+        chat_id = conn
+        send_id = user.id
+    else:
+        chat_id = update.effective_chat.id
+        send_id = chat_id
+
     note = sql.get_note(chat_id, notename)
     message = update.effective_message  # type: Optional[Message]
 
@@ -46,7 +58,7 @@ def get(bot, update, notename, show_none=True, no_format=False):
         if note.is_reply:
             if MESSAGE_DUMP:
                 try:
-                    bot.forward_message(chat_id=chat_id, from_chat_id=MESSAGE_DUMP, message_id=note.value)
+                    bot.forward_message(chat_id=update.effective_chat.id, from_chat_id=MESSAGE_DUMP, message_id=note.value)
                 except BadRequest as excp:
                     if excp.message == "Message to forward not found":
                         message.reply_text("This message seems to have been lost - I'll remove it "
@@ -56,7 +68,7 @@ def get(bot, update, notename, show_none=True, no_format=False):
                         raise
             else:
                 try:
-                    bot.forward_message(chat_id=chat_id, from_chat_id=chat_id, message_id=note.value)
+                    bot.forward_message(chat_id=update.effective_chat.id, from_chat_id=chat_id, message_id=note.value)
                 except BadRequest as excp:
                     if excp.message == "Message to forward not found":
                         message.reply_text("Looks like the original sender of this note has deleted "
@@ -71,22 +83,25 @@ def get(bot, update, notename, show_none=True, no_format=False):
             keyb = []
             parseMode = ParseMode.MARKDOWN
             buttons = sql.get_buttons(chat_id, notename)
+            should_preview_disabled = True
             if no_format:
                 parseMode = None
                 text += revert_buttons(buttons)
             else:
                 keyb = build_keyboard(buttons)
+                if "telegra.ph" in text or "youtu.be" in text:
+                    should_preview_disabled = False
 
             keyboard = InlineKeyboardMarkup(keyb)
 
             try:
                 if note.msgtype in (sql.Types.BUTTON_TEXT, sql.Types.TEXT):
-                    bot.send_message(chat_id, text, reply_to_message_id=reply_id,
-                                     parse_mode=parseMode, disable_web_page_preview=True,
+                    bot.send_message(update.effective_chat.id, text, reply_to_message_id=reply_id,
+                                     parse_mode=parseMode, disable_web_page_preview=should_preview_disabled,
                                      reply_markup=keyboard)
                 else:
-                    ENUM_FUNC_MAP[note.msgtype](chat_id, note.file, caption=text, reply_to_message_id=reply_id,
-                                                parse_mode=parseMode, disable_web_page_preview=True,
+                    ENUM_FUNC_MAP[note.msgtype](update.effective_chat.id, note.file, caption=text, reply_to_message_id=reply_id,
+                                                parse_mode=parseMode, disable_web_page_preview=should_preview_disabled,
                                                 reply_markup=keyboard)
 
             except BadRequest as excp:
@@ -130,7 +145,19 @@ def hash_get(bot: Bot, update: Update):
 @run_async
 @user_admin
 def save(bot: Bot, update: Update):
-    chat_id = update.effective_chat.id
+    chat = update.effective_chat  # type: Optional[Chat]
+    user = update.effective_user  # type: Optional[User]
+    conn = connected(bot, update, chat, user.id)
+    if not conn == False:
+        chat_id = conn
+        chat_name = dispatcher.bot.getChat(conn).title
+    else:
+        chat_id = update.effective_chat.id
+        if chat.type == "private":
+            chat_name = "local notes"
+        else:
+            chat_name = chat.title
+
     msg = update.effective_message  # type: Optional[Message]
 
     note_name, text, data_type, content, buttons = get_note_type(msg)
@@ -138,14 +165,14 @@ def save(bot: Bot, update: Update):
     if data_type is None:
         msg.reply_text("Dude, there's no note")
         return
-    
+
     if len(text.strip()) == 0:
         text = note_name
-        
+
     sql.add_note_to_db(chat_id, note_name, text, data_type, buttons=buttons, file=content)
 
     msg.reply_text(
-        "Yas! Added {note_name}.\nGet it with /get {note_name}, or #{note_name}".format(note_name=note_name))
+        "OK, Added {note_name} in *{chat_name}*.\nGet it with /get {note_name}, or #{note_name}".format(note_name=note_name, chat_name=chat_name), parse_mode=ParseMode.MARKDOWN)
 
     if msg.reply_to_message and msg.reply_to_message.from_user.is_bot:
         if text:
@@ -164,7 +191,19 @@ def save(bot: Bot, update: Update):
 @run_async
 @user_admin
 def clear(bot: Bot, update: Update, args: List[str]):
-    chat_id = update.effective_chat.id
+    chat = update.effective_chat  # type: Optional[Chat]
+    user = update.effective_user  # type: Optional[User]
+    conn = connected(bot, update, chat, user.id)
+    if not conn == False:
+        chat_id = conn
+        chat_name = dispatcher.bot.getChat(conn).title
+    else:
+        chat_id = update.effective_chat.id
+        if chat.type == "private":
+            chat_name = "local notes"
+        else:
+            chat_name = chat.title
+
     if len(args) >= 1:
         notename = args[0]
 
@@ -177,9 +216,26 @@ def clear(bot: Bot, update: Update, args: List[str]):
 @run_async
 def list_notes(bot: Bot, update: Update):
     chat_id = update.effective_chat.id
+    chat = update.effective_chat  # type: Optional[Chat]
+    user = update.effective_user  # type: Optional[User]
+    conn = connected(bot, update, chat, user.id, need_admin=False)
+    if not conn == False:
+        chat_id = conn
+        chat_name = dispatcher.bot.getChat(conn).title
+        msg = "*Notes in {}:*\n".format(chat_name)
+    else:
+        chat_id = update.effective_chat.id
+        if chat.type == "private":
+            chat_name = ""
+            msg = "*Local Notes:*\n"
+        else:
+            chat_name = chat.title
+            msg = "*Notes in {}:*\n".format(chat_name)
+
+    pre_check = msg
+
     note_list = sql.get_all_chat_notes(chat_id)
 
-    msg = "*Notes in chat:*\n"
     for note in note_list:
         note_name = escape_markdown(" - {}\n".format(note.name))
         if len(msg) + len(note_name) > MAX_MESSAGE_LENGTH:
@@ -187,10 +243,12 @@ def list_notes(bot: Bot, update: Update):
             msg = ""
         msg += note_name
 
-    if msg == "*Notes in chat:*\n":
+    if msg == pre_check:
         update.effective_message.reply_text("No notes in this chat!")
 
     elif len(msg) != 0:
+        msg += "\n\n**You can retrieve these notes by using /get notename, or #notename**"
+        msg += "\nIt is recommended to use Telegram X, to use this Telegram Bot."
         update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN)
 
 

@@ -86,11 +86,23 @@ def send_to_list(bot: Bot, send_to: list, message: str, markdown=False, html=Fal
 def build_keyboard(buttons):
     keyb = []
     for btn in buttons:
-        if btn.same_line and keyb:
-            keyb[-1].append(InlineKeyboardButton(btn.name, url=btn.url))
+        mybelru = btn.url
+        ik = None
+        cond_one = mybelru.startswith(("http", "tg://"))
+        # to fix #33801 inconsistencies
+        cond_two = (
+            "t.me/" in mybelru or
+            "telegram.me/" in mybelru
+        )
+        if cond_one or cond_two:
+            ik = InlineKeyboardButton(btn.name, url=mybelru)
         else:
-            keyb.append([InlineKeyboardButton(btn.name, url=btn.url)])
-
+            ik = InlineKeyboardButton(btn.name, callback_data=f"rsct_{btn.id}_33801")
+        if ik:
+            if btn.same_line and keyb:
+                keyb[-1].append(ik)
+            else:
+                keyb.append([ik])
     return keyb
 
 

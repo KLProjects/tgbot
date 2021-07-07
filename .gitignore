@@ -5,3 +5,7 @@ tg_bot/config.py
 .pydevproject
 .directory
 .vscode
+/venv/
+*.jpg
+search_bleck_megick.py
+

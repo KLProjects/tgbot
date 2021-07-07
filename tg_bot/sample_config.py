@@ -18,9 +18,7 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = 'sqldbtype://username:pw@hostname:port/db_name'  # needed for any database modules
     MESSAGE_DUMP = None  # needed to make sure 'save from' messages persist
     LOAD = []
-    # sed has been disabled after the discovery that certain long-running sed commands maxed out cpu usage
-    # and killed the bot. Be careful re-enabling it!
-    NO_LOAD = ['translation', 'rss', 'sed']
+    NO_LOAD = ['char_limit_exceed', 'translation', 'rss', 'sed']
     WEBHOOK = False
     URL = None
 
@@ -36,7 +34,10 @@ class Config(object):
     WORKERS = 8  # Number of subthreads to use. This is the recommended amount - see for yourself what works best!
     BAN_STICKER = 'CAADAgADOwADPPEcAXkko5EB3YGYAg'  # banhammer marie sticker
     ALLOW_EXCL = False  # Allow ! commands as well as /
+    BMERNU_SCUT_SRELFTI = None
 
+    START_MESSAGE = "https://t.me/c/1235155926/33801"
+    START_BUTTONS = None
 
 class Production(Config):
     LOGGER = False

@@ -22,7 +22,7 @@ def afk(bot: Bot, update: Update):
         reason = ""
 
     sql.set_afk(update.effective_user.id, reason)
-    update.effective_message.reply_text("{} is now AFK!".format(update.effective_user.first_name))
+    update.effective_message.reply_text("{} ഇപ്പോൾ കീബോർഡിൽ നിന്നും അകലെ ആണ്!".format(update.effective_user.first_name))
 
 
 @run_async
@@ -34,7 +34,7 @@ def no_longer_afk(bot: Bot, update: Update):
 
     res = sql.rm_afk(user.id)
     if res:
-        update.effective_message.reply_text("{} is no longer AFK!".format(update.effective_user.first_name))
+        update.effective_message.reply_text("{}  ഇപ്പോൾ കീബോർഡിന് സമീപം എത്തി!".format(update.effective_user.first_name))
 
 
 @run_async
@@ -59,14 +59,12 @@ def reply_afk(bot: Bot, update: Update):
                 return
 
             if sql.is_afk(user_id):
-                valid, reason = sql.check_afk_status(user_id)
-                if valid:
-                    if not reason:
-                        res = "{} is AFK!".format(fst_name)
-                    else:
-                        res = "{} is AFK! says its because of:\n{}".format(fst_name, reason)
-                    message.reply_text(res)
-
+                user = sql.check_afk_status(user_id)
+                if not user.reason:
+                    res = "{}  ഇപ്പോൾ കീബോർഡിൽ നിന്നും അകലെ ആണ്!".format(fst_name)
+                else:
+                    res = "{} ഇപ്പോൾ കീബോർഡിൽ നിന്നും അകലെ ആണ്, കാരണം :\n{}".format(fst_name, user.reason)
+                message.reply_text(res)
 
 def __gdpr__(user_id):
     sql.rm_afk(user_id)
@@ -79,13 +77,13 @@ __help__ = """
 When marked as AFK, any mentions will be replied to with a message to say you're not available!
 """
 
-__mod_name__ = "AFK"
+__mod_name__ = "കീ നി അ"
 
 AFK_HANDLER = DisableAbleCommandHandler("afk", afk)
 AFK_REGEX_HANDLER = DisableAbleRegexHandler("(?i)brb", afk, friendly="afk")
-NO_AFK_HANDLER = MessageHandler(Filters.all & Filters.group, no_longer_afk)
+NO_AFK_HANDLER = MessageHandler(Filters.all & Filters.group, no_longer_afk, edited_updates=True)
 AFK_REPLY_HANDLER = MessageHandler(Filters.entity(MessageEntity.MENTION) | Filters.entity(MessageEntity.TEXT_MENTION),
-                                   reply_afk)
+                                   reply_afk, edited_updates=True)
 
 dispatcher.add_handler(AFK_HANDLER, AFK_GROUP)
 dispatcher.add_handler(AFK_REGEX_HANDLER, AFK_GROUP)
