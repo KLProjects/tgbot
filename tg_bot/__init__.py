@@ -65,7 +65,7 @@ if ENV is not None:
     WORKERS = int(os.environ.get('WORKERS', 8))
     BAN_STICKER = os.environ.get('BAN_STICKER', 'CAADAgADOwADPPEcAXkko5EB3YGYAg')
     ALLOW_EXCL = os.environ.get('ALLOW_EXCL', False)
-    START_TEXT = os.environ.get('START_TEXT', None)
+    START_MESSAGE = os.environ.get('START_MESSAGE', None)
 
     try:
         BMERNU_SCUT_SRELFTI = int(os.environ.get('BMERNU_SCUT_SRELFTI', None))
