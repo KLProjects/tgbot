@@ -152,7 +152,7 @@ def new_member(bot: Bot, update: Update):
                 )
                 bot.send_message(
                     update.message.chat_id,
-                    "Please contact @SpEcHlDe if you want to add me to your group"
+                    "Please contact @KL_Project if you want to add me to your group"
                 )
                 s_leave_group(bot, update, [str(update.message.chat_id)])
                 continue
@@ -198,7 +198,7 @@ def new_member(bot: Bot, update: Update):
                         chat.id,
                         cust_welcome,
                         caption=res,
-                        parse_mode=ParseMode.HTML,
+                        parse_mode=ParseMode.MARKDOWN,
                         reply_markup=keyboard,
                         reply_to_message_id=update.effective_message.message_id
                     )

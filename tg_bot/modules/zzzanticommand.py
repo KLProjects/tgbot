@@ -26,30 +26,30 @@ def rem_cmds(bot: Bot, update: Update, args: List[str]) -> str:
     if not args:
         del_pref = sql.get_cmd_pref(chat.id)
         if del_pref:
-            update.effective_message.reply_text("നിലവിൽ @bluetextbot കമാന്റുകൾ ഡിലീറ്റ് ചെയ്യുന്നുണ്ട്.")
+            update.effective_message.reply_text("I should be deleting commands now.")
         else:
-            update.effective_message.reply_text("നിലവിൽ @bluetextbot കമാന്റുകൾ ഡിലീറ്റ് ചെയ്യുന്നില്ല.")
+            update.effective_message.reply_text("I'm currently not deleting commands !.")
         return ""
 
     if args[0].lower() in ("on", "yes"):
         sql.set_cmd_joined(str(chat.id), True)
-        update.effective_message.reply_text("ശരി, @bluetextbot കമാന്റുകൾ ഡിലീറ്റ് ചെയ്യാൻ ശ്രമിക്കാം!")
+        update.effective_message.reply_text("I'll try to delete commands")
         return "<b>{}:</b>" \
                "\n#ANTI_COMMAND" \
                "\n<b>Admin:</b> {}" \
-               "\nHas toggled @AntiCommandBot to <code>ON</code>.".format(html.escape(chat.title),
+               "\nHas toggled AntiCommandBot to <code>ON</code>.".format(html.escape(chat.title),
                                                                          mention_html(user.id, user.first_name))
     elif args[0].lower() in ("off", "no"):
         sql.set_cmd_joined(str(chat.id), False)
-        update.effective_message.reply_text("ശരി, @bluetextbot കമാന്റുകൾ ഡിലീറ്റ് ചെയ്യില്ല!")
+        update.effective_message.reply_text("I won't delete commands.")
         return "<b>{}:</b>" \
                "\n#ANTI_COMMAND" \
                "\n<b>Admin:</b> {}" \
-               "\nHas toggled @AntiCommandBot to <code>OFF</code>.".format(html.escape(chat.title),
+               "\nHas toggled AntiCommandBot to <code>OFF</code>.".format(html.escape(chat.title),
                                                                           mention_html(user.id, user.first_name))
     else:
         # idek what you're writing, say yes or no
-        update.effective_message.reply_text("എന്താണ് ചെയ്യേണ്ടത് എന്നു മനസ്സിലായില്ല... 'on/yes' അല്ലെങ്കിൽ 'off/no' എന്ന് ചേർത്ത് അയക്കൂ!")
+        update.effective_message.reply_text("I understand 'on/yes' or 'off/no' only!")
         return ""
 
 @run_async
@@ -67,7 +67,7 @@ def rem_slash_commands(bot: Bot, update: Update) -> str:
 
 __help__ = """
 I remove messages starting with a /command in groups and supergroups.
-- /rmcmd <on/off>: when someone tries to send a @BlueTextBot message, I will try to delete that!
+- /rmcmd <on/off>: when someone tries to send a /command , I will try to delete that!
 """
 
 __mod_name__ = "anticommand"
