@@ -2,7 +2,6 @@ import logging
 import os
 import sys
 import base64
-
 import telegram.ext as tg
 
 # enable logging
