@@ -1,19 +1,31 @@
 import html
 from typing import List, Optional
 
-from telegram import (Bot, CallbackQuery, Chat, InlineKeyboardButton,
-                      InlineKeyboardMarkup, Message, ParseMode, Update, User)
+from telegram import (
+    Bot,
+    CallbackQuery,
+    Chat,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    Message,
+    ParseMode,
+    Update,
+    User,
+)
 from telegram.error import BadRequest
 from telegram.ext import CommandHandler, Filters, run_async
 from telegram.utils.helpers import mention_html
 from tg_bot import BAN_STICKER, LOGGER, dispatcher
 from tg_bot.modules.disable import DisableAbleCommandHandler
-from tg_bot.modules.helper_funcs.chat_status import (_TELE_GRAM_ID_S,
-                                                     bot_admin, can_restrict,
-                                                     is_user_admin,
-                                                     is_user_ban_protected,
-                                                     is_user_in_chat,
-                                                     user_admin)
+from tg_bot.modules.helper_funcs.chat_status import (
+    _TELE_GRAM_ID_S,
+    bot_admin,
+    can_restrict,
+    is_user_admin,
+    is_user_ban_protected,
+    is_user_in_chat,
+    user_admin,
+)
 from tg_bot.modules.helper_funcs.extraction import extract_user_and_text
 from tg_bot.modules.helper_funcs.string_handling import extract_time
 from tg_bot.modules.log_channel import loggable
@@ -79,8 +91,7 @@ def ban(bot: Bot, update: Update, args: List[str]) -> str:
         reply = "{} has been banned !".format(
             mention_html(member.user.id, member.user.first_name)
         )
-        message.reply_text(reply, reply_markup=keyboard,
-                           parse_mode=ParseMode.HTML)
+        message.reply_text(reply, reply_markup=keyboard, parse_mode=ParseMode.HTML)
         return log
 
     except BadRequest as excp:
@@ -89,8 +100,7 @@ def ban(bot: Bot, update: Update, args: List[str]) -> str:
             reply = "{} has been banned !".format(
                 mention_html(member.user.id, member.user.first_name)
             )
-            message.reply_text(reply, reply_markup=keyboard,
-                               parse_mode=ParseMode.HTML)
+            message.reply_text(reply, reply_markup=keyboard, parse_mode=ParseMode.HTML)
             return log
         else:
             LOGGER.warning(update)
@@ -145,8 +155,7 @@ def temp_ban(bot: Bot, update: Update, args: List[str]) -> str:
         return ""
 
     if not reason:
-        message.reply_text(
-            "You haven't specified a time to ban this user for!")
+        message.reply_text("You haven't specified a time to ban this user for!")
         return ""
 
     split_reason = reason.split(None, 1)
@@ -181,8 +190,7 @@ def temp_ban(bot: Bot, update: Update, args: List[str]) -> str:
     try:
         chat.kick_member(user_id, until_date=bantime)
         bot.send_sticker(chat.id, BAN_STICKER)  # banhammer marie sticker
-        message.reply_text(
-            "Banned! User will be BANNED for {}.".format(time_val))
+        message.reply_text("Banned! User will be BANNED for {}.".format(time_val))
         return log
 
     except BadRequest as excp:
@@ -275,12 +283,10 @@ def kick(bot: Bot, update: Update, args: List[str]) -> str:
 def kickme(bot: Bot, update: Update):
     user_id = update.effective_message.from_user.id
     if is_user_admin(update.effective_chat, user_id):
-        update.effective_message.reply_text(
-            "I wish I could... but you're an admin.")
+        update.effective_message.reply_text("I wish I could... but you're an admin.")
         return
 
-    res = update.effective_chat.unban_member(
-        user_id)  # unban on current user = kick
+    res = update.effective_chat.unban_member(user_id)  # unban on current user = kick
     if res:
         update.effective_message.reply_text("No problem.")
     else:
@@ -362,12 +368,9 @@ BAN_HANDLER = CommandHandler("ban", ban, pass_args=True, filters=Filters.group)
 TEMPBAN_HANDLER = CommandHandler(
     ["tban", "tempban"], temp_ban, pass_args=True, filters=Filters.group
 )
-KICK_HANDLER = CommandHandler(
-    "kick", kick, pass_args=True, filters=Filters.group)
-UNBAN_HANDLER = CommandHandler(
-    "unban", unban, pass_args=True, filters=Filters.group)
-KICKME_HANDLER = DisableAbleCommandHandler(
-    "kickme", kickme, filters=Filters.group)
+KICK_HANDLER = CommandHandler("kick", kick, pass_args=True, filters=Filters.group)
+UNBAN_HANDLER = CommandHandler("unban", unban, pass_args=True, filters=Filters.group)
+KICKME_HANDLER = DisableAbleCommandHandler("kickme", kickme, filters=Filters.group)
 
 dispatcher.add_handler(BAN_HANDLER)
 dispatcher.add_handler(TEMPBAN_HANDLER)
