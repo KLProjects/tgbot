@@ -1,17 +1,11 @@
 from typing import Optional
 
-from telegram import Bot
-from telegram import Message
-from telegram import MessageEntity
-from telegram import Update
-from telegram import User
-from telegram.ext import Filters
-from telegram.ext import MessageHandler
-from telegram.ext import run_async
+from telegram import Bot, Message, MessageEntity, Update, User
+from telegram.ext import Filters, MessageHandler, run_async
 
 from tg_bot import dispatcher
-from tg_bot.modules.disable import DisableAbleCommandHandler
-from tg_bot.modules.disable import DisableAbleRegexHandler
+from tg_bot.modules.disable import (DisableAbleCommandHandler,
+                                    DisableAbleRegexHandler)
 from tg_bot.modules.sql import afk_sql as sql
 from tg_bot.modules.users import get_user_id
 
