@@ -54,7 +54,7 @@ def reply_afk(bot: Bot, update: Update):
 
             elif ent.type == MessageEntity.MENTION:
                 user_id = get_user_id(
-                    message.text[ent.offset : ent.offset + ent.length]
+                    message.text[ent.offset: ent.offset + ent.length]
                 )
                 if not user_id:
                     # Should never happen, since for a user to become AFK they must have spoken. Maybe changed username?
@@ -95,7 +95,8 @@ NO_AFK_HANDLER = MessageHandler(
     Filters.all & Filters.group, no_longer_afk, edited_updates=True
 )
 AFK_REPLY_HANDLER = MessageHandler(
-    Filters.entity(MessageEntity.MENTION) | Filters.entity(MessageEntity.TEXT_MENTION),
+    Filters.entity(MessageEntity.MENTION) | Filters.entity(
+        MessageEntity.TEXT_MENTION),
     reply_afk,
     edited_updates=True,
 )
