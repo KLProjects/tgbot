@@ -1,29 +1,26 @@
 import re
 from io import BytesIO
-from typing import List
-from typing import Optional
+from typing import List, Optional
 
-from telegram import Bot
-from telegram import InlineKeyboardMarkup
-from telegram import MAX_MESSAGE_LENGTH
-from telegram import Message
-from telegram import ParseMode
-from telegram import Update
+from telegram import (
+    MAX_MESSAGE_LENGTH,
+    Bot,
+    InlineKeyboardMarkup,
+    Message,
+    ParseMode,
+    Update,
+)
 from telegram.error import BadRequest
-from telegram.ext import CommandHandler
-from telegram.ext import RegexHandler
+from telegram.ext import CommandHandler, RegexHandler
 from telegram.ext.dispatcher import run_async
 from telegram.utils.helpers import escape_markdown
 
 import tg_bot.modules.sql.notes_sql as sql
-from tg_bot import dispatcher
-from tg_bot import LOGGER
-from tg_bot import MESSAGE_DUMP
+from tg_bot import LOGGER, MESSAGE_DUMP, dispatcher
 from tg_bot.modules.connection import connected
 from tg_bot.modules.disable import DisableAbleCommandHandler
 from tg_bot.modules.helper_funcs.chat_status import user_admin
-from tg_bot.modules.helper_funcs.misc import build_keyboard
-from tg_bot.modules.helper_funcs.misc import revert_buttons
+from tg_bot.modules.helper_funcs.misc import build_keyboard, revert_buttons
 from tg_bot.modules.helper_funcs.msg_types import get_note_type
 
 FILE_MATCHER = re.compile(r"^###file_id(!photo)?###:(.*?)(?:\s|$)")
@@ -75,7 +72,8 @@ def get(bot, update, notename, show_none=True, no_format=False):
                     if excp.message == "Message to forward not found":
                         message.reply_text(
                             "This message seems to have been lost - I'll remove it "
-                            "from your notes list.")
+                            "from your notes list."
+                        )
                         sql.rm_note(chat_id, notename)
                     else:
                         raise
@@ -92,7 +90,8 @@ def get(bot, update, notename, show_none=True, no_format=False):
                             "Looks like the original sender of this note has deleted "
                             "their message - sorry! Get your bot admin to start using a "
                             "message dump to avoid this. I'll remove this note from "
-                            "your saved notes.")
+                            "your saved notes."
+                        )
                         sql.rm_note(chat_id, notename)
                     else:
                         raise
@@ -138,19 +137,23 @@ def get(bot, update, notename, show_none=True, no_format=False):
                     message.reply_text(
                         "Looks like you tried to mention someone I've never seen before. If you really "
                         "want to mention them, forward one of their messages to me, and I'll be able "
-                        "to tag them!")
+                        "to tag them!"
+                    )
                 elif FILE_MATCHER.match(note.value):
                     message.reply_text(
                         "This note was an incorrectly imported file from another bot - I can't use "
                         "it. If you really need it, you'll have to save it again. In "
-                        "the meantime, I'll remove it from your notes list.")
+                        "the meantime, I'll remove it from your notes list."
+                    )
                     sql.rm_note(chat_id, notename)
                 else:
                     message.reply_text(
                         "This note could not be sent, as it is incorrectly formatted. Ask in "
-                        "@MarieSupport if you can't figure out why!")
-                    LOGGER.exception("Could not parse message #%s in chat %s",
-                                     notename, str(chat_id))
+                        "@MarieSupport if you can't figure out why!"
+                    )
+                    LOGGER.exception(
+                        "Could not parse message #%s in chat %s", notename, str(chat_id)
+                    )
                     LOGGER.warning("Message was: %s", str(note.value))
         return
     elif show_none:
@@ -202,16 +205,14 @@ def save(bot: Bot, update: Update):
     if len(text.strip()) == 0:
         text = note_name
 
-    sql.add_note_to_db(chat_id,
-                       note_name,
-                       text,
-                       data_type,
-                       buttons=buttons,
-                       file=content)
+    sql.add_note_to_db(
+        chat_id, note_name, text, data_type, buttons=buttons, file=content
+    )
 
     msg.reply_text(
-        "OK, Added {note_name} in *{chat_name}*.\nGet it with /get {note_name}, or #{note_name}"
-        .format(note_name=note_name, chat_name=chat_name),
+        "OK, Added {note_name} in *{chat_name}*.\nGet it with /get {note_name}, or #{note_name}".format(
+            note_name=note_name, chat_name=chat_name
+        ),
         parse_mode=ParseMode.MARKDOWN,
     )
 
@@ -221,13 +222,15 @@ def save(bot: Bot, update: Update):
                 "Seems like you're trying to save a message from a bot. Unfortunately, "
                 "bots can't forward bot messages, so I can't save the exact message. "
                 "\nI'll save all the text I can, but if you want more, you'll have to "
-                "forward the message yourself, and then save it.")
+                "forward the message yourself, and then save it."
+            )
         else:
             msg.reply_text(
                 "Bots are kinda handicapped by telegram, making it hard for bots to "
                 "interact with other bots, so I can't save this message "
                 "like I usually would - do you mind forwarding it and "
-                "then saving that new message? Thanks!")
+                "then saving that new message? Thanks!"
+            )
         return
 
 
@@ -253,8 +256,7 @@ def clear(bot: Bot, update: Update, args: List[str]):
         if sql.rm_note(chat_id, notename):
             update.effective_message.reply_text("Successfully removed note.")
         else:
-            update.effective_message.reply_text(
-                "That's not a note in my database!")
+            update.effective_message.reply_text("That's not a note in my database!")
 
 
 @run_async
@@ -283,8 +285,7 @@ def list_notes(bot: Bot, update: Update):
     for note in note_list:
         note_name = escape_markdown(" - {}\n".format(note.name))
         if len(msg) + len(note_name) > MAX_MESSAGE_LENGTH:
-            update.effective_message.reply_text(msg,
-                                                parse_mode=ParseMode.MARKDOWN)
+            update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN)
             msg = ""
         msg += note_name
 
@@ -306,10 +307,9 @@ def __import_data__(chat_id, data):
 
         if match:
             failures.append(notename)
-            notedata = notedata[match.end():].strip()
+            notedata = notedata[match.end() :].strip()
             if notedata:
-                sql.add_note_to_db(chat_id, notename[1:], notedata,
-                                   sql.Types.TEXT)
+                sql.add_note_to_db(chat_id, notename[1:], notedata, sql.Types.TEXT)
         else:
             sql.add_note_to_db(chat_id, notename[1:], notedata, sql.Types.TEXT)
 
@@ -327,8 +327,7 @@ def __import_data__(chat_id, data):
 
 
 def __stats__():
-    return "{} notes, across {} chats.".format(sql.num_notes(),
-                                               sql.num_chats())
+    return "{} notes, across {} chats.".format(sql.num_notes(), sql.num_chats())
 
 
 def __migrate__(old_chat_id, new_chat_id):
@@ -364,9 +363,7 @@ HASH_GET_HANDLER = RegexHandler(r"^#[^\s]+", hash_get)
 SAVE_HANDLER = CommandHandler("save", save)
 DELETE_HANDLER = CommandHandler("clear", clear, pass_args=True)
 
-LIST_HANDLER = DisableAbleCommandHandler(["notes", "saved"],
-                                         list_notes,
-                                         admin_ok=True)
+LIST_HANDLER = DisableAbleCommandHandler(["notes", "saved"], list_notes, admin_ok=True)
 
 dispatcher.add_handler(GET_HANDLER)
 dispatcher.add_handler(SAVE_HANDLER)
