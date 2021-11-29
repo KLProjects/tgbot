@@ -1,9 +1,9 @@
 # New chat added -> setup permissions
 import threading
 
-from sqlalchemy import Column, String, Boolean
+from sqlalchemy import Boolean, Column, String
 
-from tg_bot.modules.sql import SESSION, BASE
+from tg_bot.modules.sql import BASE, SESSION
 
 
 class Permissions(BASE):
@@ -120,15 +120,15 @@ def update_lock(chat_id, lock_type, locked):
             curr_perm.sticker = locked
         elif lock_type == "gif":
             curr_perm.gif = locked
-        elif lock_type == 'url':
+        elif lock_type == "url":
             curr_perm.url = locked
-        elif lock_type == 'bots':
+        elif lock_type == "bots":
             curr_perm.bots = locked
-        elif lock_type == 'forward':
+        elif lock_type == "forward":
             curr_perm.forward = locked
-        elif lock_type == 'game':
+        elif lock_type == "game":
             curr_perm.game = locked
-        elif lock_type == 'location':
+        elif lock_type == "location":
             curr_perm.location = locked
 
         SESSION.add(curr_perm)
@@ -211,7 +211,12 @@ def is_restr_locked(chat_id, lock_type):
     elif lock_type == "previews":
         return curr_restr.preview
     elif lock_type == "all":
-        return curr_restr.messages and curr_restr.media and curr_restr.other and curr_restr.preview
+        return (
+            curr_restr.messages
+            and curr_restr.media
+            and curr_restr.other
+            and curr_restr.preview
+        )
 
 
 def get_locks(chat_id):
