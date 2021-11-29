@@ -2,8 +2,14 @@ import re
 from io import BytesIO
 from typing import List, Optional
 
-from telegram import (MAX_MESSAGE_LENGTH, Bot, InlineKeyboardMarkup, Message,
-                      ParseMode, Update)
+from telegram import (
+    MAX_MESSAGE_LENGTH,
+    Bot,
+    InlineKeyboardMarkup,
+    Message,
+    ParseMode,
+    Update,
+)
 from telegram.error import BadRequest
 from telegram.ext import CommandHandler, RegexHandler
 from telegram.ext.dispatcher import run_async
