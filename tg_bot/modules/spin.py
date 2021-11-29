@@ -1,7 +1,7 @@
 import html
-from typing import Optional, List
+from typing import List, Optional
 
-from telegram import Chat, Update, Bot, User
+from telegram import Bot, Chat, Update, User
 from telegram.error import BadRequest
 from telegram.ext import CommandHandler, Filters, MessageHandler
 from telegram.ext.dispatcher import run_async
@@ -10,13 +10,12 @@ from telegram.utils.helpers import mention_html
 from tg_bot import dispatcher
 from tg_bot.modules.helper_funcs.chat_status import (
     bot_admin,
-    user_admin,
+    can_delete,
     can_pin,
-    can_delete
+    user_admin,
 )
 from tg_bot.modules.log_channel import loggable
 from tg_bot.modules.sql import pin_sql as sql
-
 
 PMW_GROUP = 12
 
@@ -37,17 +36,15 @@ def pin(bot: Bot, update: Update, args: List[str]) -> str:
     is_silent = True
     if len(args) >= 1:
         is_silent = not (
-            args[0].lower() == 'notify' or
-            args[0].lower() == 'loud' or
-            args[0].lower() == 'violent'
+            args[0].lower() == "notify"
+            or args[0].lower() == "loud"
+            or args[0].lower() == "violent"
         )
 
     if prev_message and is_group:
         try:
             bot.pinChatMessage(
-                chat.id,
-                prev_message.message_id,
-                disable_notification=is_silent
+                chat.id, prev_message.message_id, disable_notification=is_silent
             )
         except BadRequest as excp:
             if excp.message == "Chat_not_modified":
@@ -55,12 +52,13 @@ def pin(bot: Bot, update: Update, args: List[str]) -> str:
             else:
                 raise
         sql.add_mid(chat.id, prev_message.message_id)
-        return "<b>{}:</b>" \
-               "\n#PINNED" \
-               "\n<b>Admin:</b> {}".format(
-                   html.escape(chat.title),
-                   mention_html(user.id, user.first_name)
-                )
+        return (
+            "<b>{}:</b>"
+            "\n#PINNED"
+            "\n<b>Admin:</b> {}".format(
+                html.escape(chat.title), mention_html(user.id, user.first_name)
+            )
+        )
 
     return ""
 
@@ -82,10 +80,13 @@ def unpin(bot: Bot, update: Update) -> str:
         else:
             raise
     sql.remove_mid(chat.id)
-    return "<b>{}:</b>" \
-           "\n#UNPINNED" \
-           "\n<b>Admin:</b> {}".format(html.escape(chat.title),
-                                       mention_html(user.id, user.first_name))
+    return (
+        "<b>{}:</b>"
+        "\n#UNPINNED"
+        "\n<b>Admin:</b> {}".format(
+            html.escape(chat.title), mention_html(user.id, user.first_name)
+        )
+    )
 
 
 @run_async
@@ -103,20 +104,28 @@ def anti_channel_pin(bot: Bot, update: Update, args: List[str]) -> str:
 
     if args[0].lower() in ("on", "yes"):
         sql.add_acp_o(str(chat.id), True)
-        update.effective_message.reply_text("I'll try to unpin Telegram Channel messages!")
-        return "<b>{}:</b>" \
-               "\n#ANTI_CHANNEL_PIN" \
-               "\n<b>Admin:</b> {}" \
-               "\nHas toggled ANTI CHANNEL PIN to <code>ON</code>.".format(html.escape(chat.title),
-                                                                         mention_html(user.id, user.first_name))
+        update.effective_message.reply_text(
+            "I'll try to unpin Telegram Channel messages!"
+        )
+        return (
+            "<b>{}:</b>"
+            "\n#ANTI_CHANNEL_PIN"
+            "\n<b>Admin:</b> {}"
+            "\nHas toggled ANTI CHANNEL PIN to <code>ON</code>.".format(
+                html.escape(chat.title), mention_html(user.id, user.first_name)
+            )
+        )
     elif args[0].lower() in ("off", "no"):
         sql.add_acp_o(str(chat.id), False)
         update.effective_message.reply_text("I won't unpin Telegram Channel Messages!")
-        return "<b>{}:</b>" \
-               "\n#ANTI_CHANNEL_PIN" \
-               "\n<b>Admin:</b> {}" \
-               "\nHas toggled ANTI CHANNEL PIN to <code>OFF</code>.".format(html.escape(chat.title),
-                                                                          mention_html(user.id, user.first_name))
+        return (
+            "<b>{}:</b>"
+            "\n#ANTI_CHANNEL_PIN"
+            "\n<b>Admin:</b> {}"
+            "\nHas toggled ANTI CHANNEL PIN to <code>OFF</code>.".format(
+                html.escape(chat.title), mention_html(user.id, user.first_name)
+            )
+        )
     else:
         # idek what you're writing, say yes or no
         update.effective_message.reply_text("I understand 'on/yes' or 'off/no' only!")
@@ -138,20 +147,28 @@ def clean_linked_channel(bot: Bot, update: Update, args: List[str]) -> str:
 
     if args[0].lower() in ("on", "yes"):
         sql.add_ldp_m(str(chat.id), True)
-        update.effective_message.reply_text("I'll try to delete Telegram Channel messages!")
-        return "<b>{}:</b>" \
-               "\n#CLEAN_CHANNEL_MESSAGES" \
-               "\n<b>Admin:</b> {}" \
-               "\nHas toggled DELETE CHANNEL MESSAGES to <code>ON</code>.".format(html.escape(chat.title),
-                                                                         mention_html(user.id, user.first_name))
+        update.effective_message.reply_text(
+            "I'll try to delete Telegram Channel messages!"
+        )
+        return (
+            "<b>{}:</b>"
+            "\n#CLEAN_CHANNEL_MESSAGES"
+            "\n<b>Admin:</b> {}"
+            "\nHas toggled DELETE CHANNEL MESSAGES to <code>ON</code>.".format(
+                html.escape(chat.title), mention_html(user.id, user.first_name)
+            )
+        )
     elif args[0].lower() in ("off", "no"):
         sql.add_ldp_m(str(chat.id), False)
         update.effective_message.reply_text("I won't delete Telegram Channel Messages!")
-        return "<b>{}:</b>" \
-               "\n#CLEAN_CHANNEL_MESSAGES" \
-               "\n<b>Admin:</b> {}" \
-               "\nHas toggled DELETE CHANNEL MESSAGES to <code>OFF</code>.".format(html.escape(chat.title),
-                                                                          mention_html(user.id, user.first_name))
+        return (
+            "<b>{}:</b>"
+            "\n#CLEAN_CHANNEL_MESSAGES"
+            "\n<b>Admin:</b> {}"
+            "\nHas toggled DELETE CHANNEL MESSAGES to <code>OFF</code>.".format(
+                html.escape(chat.title), mention_html(user.id, user.first_name)
+            )
+        )
     else:
         # idek what you're writing, say yes or no
         update.effective_message.reply_text("I understand 'on/yes' or 'off/no' only!")
@@ -182,11 +199,7 @@ def amwltro_conreko(bot: Bot, update: Update):
 
 def pin_chat_message(bot, chat_id, message_id, is_silent):
     try:
-        bot.pinChatMessage(
-            chat_id,
-            message_id,
-            disable_notification=is_silent
-        )
+        bot.pinChatMessage(chat_id, message_id, disable_notification=is_silent)
     except BadRequest as excp:
         if excp.message == "Chat_not_modified":
             pass
@@ -220,9 +233,15 @@ __mod_name__ = "Pins"
 
 PIN_HANDLER = CommandHandler("pin", pin, pass_args=True, filters=Filters.group)
 UNPIN_HANDLER = CommandHandler("unpin", unpin, filters=Filters.group)
-ATCPIN_HANDLER = CommandHandler("antichannelpin", anti_channel_pin, pass_args=True, filters=Filters.group)
-CLCLDC_HANDLER = CommandHandler("cleanlinked", clean_linked_channel, pass_args=True, filters=Filters.group)
-AMWLTRO_HANDLER = MessageHandler(Filters.forwarded & Filters.group, amwltro_conreko, edited_updates=False)
+ATCPIN_HANDLER = CommandHandler(
+    "antichannelpin", anti_channel_pin, pass_args=True, filters=Filters.group
+)
+CLCLDC_HANDLER = CommandHandler(
+    "cleanlinked", clean_linked_channel, pass_args=True, filters=Filters.group
+)
+AMWLTRO_HANDLER = MessageHandler(
+    Filters.forwarded & Filters.group, amwltro_conreko, edited_updates=False
+)
 
 dispatcher.add_handler(PIN_HANDLER)
 dispatcher.add_handler(UNPIN_HANDLER)

@@ -1,9 +1,9 @@
 import threading
 
-from sqlalchemy import Integer, Column, String, func, distinct, Boolean
+from sqlalchemy import Boolean, Column, Integer, String, distinct, func
 from sqlalchemy.dialects import postgresql
 
-from tg_bot.modules.sql import SESSION, BASE
+from tg_bot.modules.sql import BASE, SESSION
 
 
 class SPinSettings(BASE):
@@ -17,7 +17,6 @@ class SPinSettings(BASE):
     def __init__(self, chat_id, message_id):
         self.chat_id = str(chat_id)
         self.message_id = message_id
-
 
     def __repr__(self):
         return "<Pin Settings for {} in {}>".format(self.chat_id, self.message_id)
@@ -73,5 +72,3 @@ def get_current_settings(chat_id):
     with PIN_INSERTION_LOCK:
         chat = SESSION.query(SPinSettings).get(str(chat_id))
         return chat
-
-

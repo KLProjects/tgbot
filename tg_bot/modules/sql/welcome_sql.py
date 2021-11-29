@@ -1,9 +1,9 @@
 import threading
 
-from sqlalchemy import Column, String, Boolean, UnicodeText, Integer, BigInteger
+from sqlalchemy import BigInteger, Boolean, Column, Integer, String, UnicodeText
 
 from tg_bot.modules.helper_funcs.msg_types import Types
-from tg_bot.modules.sql import SESSION, BASE
+from tg_bot.modules.sql import BASE, SESSION
 
 DEFAULT_WELCOME = "Hey {first}, how are you?"
 DEFAULT_GOODBYE = "Nice knowing ya!"
@@ -32,7 +32,9 @@ class Welcome(BASE):
         self.should_goodbye = should_goodbye
 
     def __repr__(self):
-        return "<Chat {} should Welcome new users: {}>".format(self.chat_id, self.should_welcome)
+        return "<Chat {} should Welcome new users: {}>".format(
+            self.chat_id, self.should_welcome
+        )
 
 
 class WelcomeButtons(BASE):
@@ -79,7 +81,12 @@ def get_welc_pref(chat_id):
     SESSION.close()
 
     if welc:
-        return welc.should_welcome, welc.custom_welcome, welc.welcome_type, welc.custom_welcome_caption
+        return (
+            welc.should_welcome,
+            welc.custom_welcome,
+            welc.welcome_type,
+            welc.custom_welcome_caption,
+        )
     else:
         # Welcome by default.
         return True, DEFAULT_WELCOME, Types.TEXT, None
@@ -185,7 +192,9 @@ def set_gdbye_preference(chat_id, should_goodbye):
         SESSION.commit()
 
 
-def set_custom_welcome(chat_id, custom_welcome, welcome_type, buttons=None, caption=None):
+def set_custom_welcome(
+    chat_id, custom_welcome, welcome_type, buttons=None, caption=None
+):
     if buttons is None:
         buttons = []
 
@@ -207,7 +216,11 @@ def set_custom_welcome(chat_id, custom_welcome, welcome_type, buttons=None, capt
         SESSION.add(welcome_settings)
 
         with WELC_BTN_LOCK:
-            prev_buttons = SESSION.query(WelcomeButtons).filter(WelcomeButtons.chat_id == str(chat_id)).all()
+            prev_buttons = (
+                SESSION.query(WelcomeButtons)
+                .filter(WelcomeButtons.chat_id == str(chat_id))
+                .all()
+            )
             for btn in prev_buttons:
                 SESSION.delete(btn)
 
@@ -248,7 +261,11 @@ def set_custom_gdbye(chat_id, custom_goodbye, goodbye_type, buttons=None):
         SESSION.add(welcome_settings)
 
         with LEAVE_BTN_LOCK:
-            prev_buttons = SESSION.query(GoodbyeButtons).filter(GoodbyeButtons.chat_id == str(chat_id)).all()
+            prev_buttons = (
+                SESSION.query(GoodbyeButtons)
+                .filter(GoodbyeButtons.chat_id == str(chat_id))
+                .all()
+            )
             for btn in prev_buttons:
                 SESSION.delete(btn)
 
@@ -271,16 +288,24 @@ def get_custom_gdbye(chat_id):
 
 def get_welc_buttons(chat_id):
     try:
-        return SESSION.query(WelcomeButtons).filter(WelcomeButtons.chat_id == str(chat_id)).order_by(
-            WelcomeButtons.id).all()
+        return (
+            SESSION.query(WelcomeButtons)
+            .filter(WelcomeButtons.chat_id == str(chat_id))
+            .order_by(WelcomeButtons.id)
+            .all()
+        )
     finally:
         SESSION.close()
 
 
 def get_gdbye_buttons(chat_id):
     try:
-        return SESSION.query(GoodbyeButtons).filter(GoodbyeButtons.chat_id == str(chat_id)).order_by(
-            GoodbyeButtons.id).all()
+        return (
+            SESSION.query(GoodbyeButtons)
+            .filter(GoodbyeButtons.chat_id == str(chat_id))
+            .order_by(GoodbyeButtons.id)
+            .all()
+        )
     finally:
         SESSION.close()
 
@@ -292,12 +317,20 @@ def migrate_chat(old_chat_id, new_chat_id):
             chat.chat_id = str(new_chat_id)
 
         with WELC_BTN_LOCK:
-            chat_buttons = SESSION.query(WelcomeButtons).filter(WelcomeButtons.chat_id == str(old_chat_id)).all()
+            chat_buttons = (
+                SESSION.query(WelcomeButtons)
+                .filter(WelcomeButtons.chat_id == str(old_chat_id))
+                .all()
+            )
             for btn in chat_buttons:
                 btn.chat_id = str(new_chat_id)
 
         with LEAVE_BTN_LOCK:
-            chat_buttons = SESSION.query(GoodbyeButtons).filter(GoodbyeButtons.chat_id == str(old_chat_id)).all()
+            chat_buttons = (
+                SESSION.query(GoodbyeButtons)
+                .filter(GoodbyeButtons.chat_id == str(old_chat_id))
+                .all()
+            )
             for btn in chat_buttons:
                 btn.chat_id = str(new_chat_id)
 

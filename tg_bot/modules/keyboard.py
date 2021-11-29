@@ -1,14 +1,15 @@
 from math import ceil
-from typing import List, Dict
+from typing import Dict, List
 
-from telegram import Bot, ParseMode, ReplyKeyboardMarkup, KeyboardButton
+from telegram import Bot, KeyboardButton, ParseMode, ReplyKeyboardMarkup
 from telegram.error import TelegramError
 
-from tg_bot import dispatcher
-#from tg_bot.modules.translations.strings import tld
-from telegram.ext import CommandHandler, Filters, MessageHandler, CallbackQueryHandler
+# from tg_bot.modules.translations.strings import tld
+from telegram.ext import CallbackQueryHandler, CommandHandler, Filters, MessageHandler
 
 import tg_bot.modules.sql.connection_sql as con_sql
+from tg_bot import dispatcher
+
 
 def keyboard(bot, update):
     user = update.effective_user  # type: Optional[User]
@@ -48,17 +49,24 @@ def keyboard(bot, update):
         else:
             btn3 = ""
 
-        #TODO: Remove except garbage
+        # TODO: Remove except garbage
 
-    update.effective_message.reply_text("keyboard updated",
-                                            reply_markup=ReplyKeyboardMarkup([[
-                                                KeyboardButton("/help - Bot Help"), 
-                                                KeyboardButton("/donate - Donate"),
-                                                KeyboardButton("/notes - Notes")],
-                                             [KeyboardButton(btn1)], 
-                                             [KeyboardButton(btn2)],
-                                             [KeyboardButton(btn3)]]))
-    
+    update.effective_message.reply_text(
+        "keyboard updated",
+        reply_markup=ReplyKeyboardMarkup(
+            [
+                [
+                    KeyboardButton("/help - Bot Help"),
+                    KeyboardButton("/donate - Donate"),
+                    KeyboardButton("/notes - Notes"),
+                ],
+                [KeyboardButton(btn1)],
+                [KeyboardButton(btn2)],
+                [KeyboardButton(btn3)],
+            ]
+        ),
+    )
+
 
 KEYBOARD_HANDLER = CommandHandler(["keyboard"], keyboard)
 dispatcher.add_handler(KEYBOARD_HANDLER)

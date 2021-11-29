@@ -1,18 +1,16 @@
 import html
 import json
-
-from typing import Optional, List
+from typing import List, Optional
 
 import requests
-from telegram import Message, Chat, Update, Bot, MessageEntity
+from telegram import Bot, Chat, Message, MessageEntity, ParseMode, Update
 from telegram.error import BadRequest
-from telegram import ParseMode
-from telegram.ext import CommandHandler, run_async, Filters, MessageHandler
-from telegram.utils.helpers import mention_markdown, mention_html, escape_markdown
+from telegram.ext import CommandHandler, Filters, MessageHandler, run_async
+from telegram.utils.helpers import escape_markdown, mention_html, mention_markdown
 
 import tg_bot.modules.sql.welcome_sql as sql
-from tg_bot import dispatcher, LOGGER
-from tg_bot.modules.helper_funcs.chat_status import user_admin, can_delete
+from tg_bot import LOGGER, dispatcher
+from tg_bot.modules.helper_funcs.chat_status import can_delete, user_admin
 from tg_bot.modules.log_channel import loggable
 
 
@@ -28,29 +26,38 @@ def rem_cmds(bot: Bot, update: Update, args: List[str]) -> str:
         if del_pref:
             update.effective_message.reply_text("I should be deleting commands now.")
         else:
-            update.effective_message.reply_text("I'm currently not deleting commands !.")
+            update.effective_message.reply_text(
+                "I'm currently not deleting commands !."
+            )
         return ""
 
     if args[0].lower() in ("on", "yes"):
         sql.set_cmd_joined(str(chat.id), True)
         update.effective_message.reply_text("I'll try to delete commands")
-        return "<b>{}:</b>" \
-               "\n#ANTI_COMMAND" \
-               "\n<b>Admin:</b> {}" \
-               "\nHas toggled AntiCommandBot to <code>ON</code>.".format(html.escape(chat.title),
-                                                                         mention_html(user.id, user.first_name))
+        return (
+            "<b>{}:</b>"
+            "\n#ANTI_COMMAND"
+            "\n<b>Admin:</b> {}"
+            "\nHas toggled AntiCommandBot to <code>ON</code>.".format(
+                html.escape(chat.title), mention_html(user.id, user.first_name)
+            )
+        )
     elif args[0].lower() in ("off", "no"):
         sql.set_cmd_joined(str(chat.id), False)
         update.effective_message.reply_text("I won't delete commands.")
-        return "<b>{}:</b>" \
-               "\n#ANTI_COMMAND" \
-               "\n<b>Admin:</b> {}" \
-               "\nHas toggled AntiCommandBot to <code>OFF</code>.".format(html.escape(chat.title),
-                                                                          mention_html(user.id, user.first_name))
+        return (
+            "<b>{}:</b>"
+            "\n#ANTI_COMMAND"
+            "\n<b>Admin:</b> {}"
+            "\nHas toggled AntiCommandBot to <code>OFF</code>.".format(
+                html.escape(chat.title), mention_html(user.id, user.first_name)
+            )
+        )
     else:
         # idek what you're writing, say yes or no
         update.effective_message.reply_text("I understand 'on/yes' or 'off/no' only!")
         return ""
+
 
 @run_async
 def rem_slash_commands(bot: Bot, update: Update) -> str:
@@ -72,7 +79,9 @@ I remove messages starting with a /command in groups and supergroups.
 
 __mod_name__ = "anticommand"
 
-DEL_REM_COMMANDS = CommandHandler("rmcmd", rem_cmds, pass_args=True, filters=Filters.group)
+DEL_REM_COMMANDS = CommandHandler(
+    "rmcmd", rem_cmds, pass_args=True, filters=Filters.group
+)
 REM_SLASH_COMMANDS = MessageHandler(Filters.command & Filters.group, rem_slash_commands)
 
 dispatcher.add_handler(DEL_REM_COMMANDS)

@@ -1,20 +1,23 @@
-from telegram import Message, Chat, Update, Bot
-from telegram import ParseMode
+import os
+
+from telegram import Bot, Chat, Message, ParseMode, Update
 from telegram.ext import CommandHandler, run_async
 from telegram.utils.helpers import escape_markdown
 
 from tg_bot import dispatcher
 from tg_bot.modules.disable import DisableAbleCommandHandler
-import os
 
 
 @run_async
 def stickerid(bot: Bot, update: Update):
     msg = update.effective_message
     if msg.reply_to_message and msg.reply_to_message.sticker:
-        update.effective_message.reply_text("Sticker ID:\n```" +
-                                            escape_markdown(msg.reply_to_message.sticker.file_id) + "```",
-                                            parse_mode=ParseMode.MARKDOWN)
+        update.effective_message.reply_text(
+            "Sticker ID:\n```"
+            + escape_markdown(msg.reply_to_message.sticker.file_id)
+            + "```",
+            parse_mode=ParseMode.MARKDOWN,
+        )
     else:
         update.effective_message.reply_text("Please reply to a sticker to get its ID.")
 
@@ -26,11 +29,14 @@ def getsticker(bot: Bot, update: Update):
     if msg.reply_to_message and msg.reply_to_message.sticker:
         file_id = msg.reply_to_message.sticker.file_id
         newFile = bot.get_file(file_id)
-        newFile.download('sticker.png')
-        bot.sendDocument(chat_id, document=open('sticker.png', 'rb'))
-        os.remove('sticker.png')
+        newFile.download("sticker.png")
+        bot.sendDocument(chat_id, document=open("sticker.png", "rb"))
+        os.remove("sticker.png")
     else:
-        update.effective_message.reply_text("Please reply to a sticker for me to upload its PNG.")
+        update.effective_message.reply_text(
+            "Please reply to a sticker for me to upload its PNG."
+        )
+
 
 # /ip is for private use
 __help__ = """
