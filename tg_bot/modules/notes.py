@@ -1,20 +1,29 @@
 import re
 from io import BytesIO
-from typing import List, Optional
+from typing import List
+from typing import Optional
 
-from telegram import (MAX_MESSAGE_LENGTH, Bot, InlineKeyboardMarkup, Message,
-                      ParseMode, Update)
+from telegram import Bot
+from telegram import InlineKeyboardMarkup
+from telegram import MAX_MESSAGE_LENGTH
+from telegram import Message
+from telegram import ParseMode
+from telegram import Update
 from telegram.error import BadRequest
-from telegram.ext import CommandHandler, RegexHandler
+from telegram.ext import CommandHandler
+from telegram.ext import RegexHandler
 from telegram.ext.dispatcher import run_async
 from telegram.utils.helpers import escape_markdown
 
 import tg_bot.modules.sql.notes_sql as sql
-from tg_bot import LOGGER, MESSAGE_DUMP, dispatcher
+from tg_bot import dispatcher
+from tg_bot import LOGGER
+from tg_bot import MESSAGE_DUMP
 from tg_bot.modules.connection import connected
 from tg_bot.modules.disable import DisableAbleCommandHandler
 from tg_bot.modules.helper_funcs.chat_status import user_admin
-from tg_bot.modules.helper_funcs.misc import build_keyboard, revert_buttons
+from tg_bot.modules.helper_funcs.misc import build_keyboard
+from tg_bot.modules.helper_funcs.misc import revert_buttons
 from tg_bot.modules.helper_funcs.msg_types import get_note_type
 
 FILE_MATCHER = re.compile(r"^###file_id(!photo)?###:(.*?)(?:\s|$)")
