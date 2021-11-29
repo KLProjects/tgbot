@@ -145,7 +145,8 @@ def get(bot, update, notename, show_none=True, no_format=False):
                         "@MarieSupport if you can't figure out why!"
                     )
                     LOGGER.exception(
-                        "Could not parse message #%s in chat %s", notename, str(chat_id)
+                        "Could not parse message #%s in chat %s", notename, str(
+                            chat_id)
                     )
                     LOGGER.warning("Message was: %s", str(note.value))
         return
@@ -249,7 +250,8 @@ def clear(bot: Bot, update: Update, args: List[str]):
         if sql.rm_note(chat_id, notename):
             update.effective_message.reply_text("Successfully removed note.")
         else:
-            update.effective_message.reply_text("That's not a note in my database!")
+            update.effective_message.reply_text(
+                "That's not a note in my database!")
 
 
 @run_async
@@ -278,7 +280,8 @@ def list_notes(bot: Bot, update: Update):
     for note in note_list:
         note_name = escape_markdown(" - {}\n".format(note.name))
         if len(msg) + len(note_name) > MAX_MESSAGE_LENGTH:
-            update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN)
+            update.effective_message.reply_text(
+                msg, parse_mode=ParseMode.MARKDOWN)
             msg = ""
         msg += note_name
 
@@ -300,9 +303,10 @@ def __import_data__(chat_id, data):
 
         if match:
             failures.append(notename)
-            notedata = notedata[match.end() :].strip()
+            notedata = notedata[match.end():].strip()
             if notedata:
-                sql.add_note_to_db(chat_id, notename[1:], notedata, sql.Types.TEXT)
+                sql.add_note_to_db(
+                    chat_id, notename[1:], notedata, sql.Types.TEXT)
         else:
             sql.add_note_to_db(chat_id, notename[1:], notedata, sql.Types.TEXT)
 
@@ -356,7 +360,8 @@ HASH_GET_HANDLER = RegexHandler(r"^#[^\s]+", hash_get)
 SAVE_HANDLER = CommandHandler("save", save)
 DELETE_HANDLER = CommandHandler("clear", clear, pass_args=True)
 
-LIST_HANDLER = DisableAbleCommandHandler(["notes", "saved"], list_notes, admin_ok=True)
+LIST_HANDLER = DisableAbleCommandHandler(
+    ["notes", "saved"], list_notes, admin_ok=True)
 
 dispatcher.add_handler(GET_HANDLER)
 dispatcher.add_handler(SAVE_HANDLER)
