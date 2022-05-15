@@ -1,8 +1,8 @@
 import threading
 
-from sqlalchemy import Column, Integer, UnicodeText, String
+from sqlalchemy import Column, Integer, String, UnicodeText
 
-from tg_bot.modules.sql import SESSION, BASE
+from tg_bot.modules.sql import BASE, SESSION
 
 
 class UserInfo(BASE):
