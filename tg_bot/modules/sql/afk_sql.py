@@ -1,6 +1,6 @@
 import threading
 
-from sqlalchemy import Column, UnicodeText, Boolean, Integer ,String
+from sqlalchemy import Column, UnicodeText, Boolean, Integer, String
 
 from tg_bot.modules.sql import BASE, SESSION
 
@@ -71,7 +71,8 @@ def __load_afk_users():
     global AFK_USERS
     try:
         all_afk = SESSION.query(AFK).all()
-        AFK_USERS = {user.user_id: user.reason for user in all_afk if user.is_afk}
+        AFK_USERS = {
+            user.user_id: user.reason for user in all_afk if user.is_afk}
     finally:
         SESSION.close()
 
