@@ -1,10 +1,16 @@
 import threading
 
-from sqlalchemy import (Column, ForeignKey, Integer, String, UnicodeText,
-                        UniqueConstraint, func)
+from sqlalchemy import Column
+from sqlalchemy import ForeignKey
+from sqlalchemy import func
+from sqlalchemy import Integer
+from sqlalchemy import String
+from sqlalchemy import UnicodeText
+from sqlalchemy import UniqueConstraint
 
 from tg_bot import dispatcher
-from tg_bot.modules.sql import BASE, SESSION
+from tg_bot.modules.sql import BASE
+from tg_bot.modules.sql import SESSION
 
 
 class Users(BASE):

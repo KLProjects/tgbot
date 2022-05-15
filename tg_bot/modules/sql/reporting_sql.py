@@ -1,9 +1,13 @@
 import threading
 from typing import Union
 
-from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy import Boolean
+from sqlalchemy import Column
+from sqlalchemy import Integer
+from sqlalchemy import String
 
-from tg_bot.modules.sql import BASE, SESSION
+from tg_bot.modules.sql import BASE
+from tg_bot.modules.sql import SESSION
 
 
 class ReportingUserSettings(BASE):

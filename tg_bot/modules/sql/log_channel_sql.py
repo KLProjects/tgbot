@@ -1,8 +1,12 @@
 import threading
 
-from sqlalchemy import Column, String, distinct, func
+from sqlalchemy import Column
+from sqlalchemy import distinct
+from sqlalchemy import func
+from sqlalchemy import String
 
-from tg_bot.modules.sql import BASE, SESSION
+from tg_bot.modules.sql import BASE
+from tg_bot.modules.sql import SESSION
 
 
 class GroupLogs(BASE):

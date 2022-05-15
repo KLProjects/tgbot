@@ -1,10 +1,15 @@
 import threading
 
-from sqlalchemy import (BigInteger, Boolean, Column, Integer, String,
-                        UnicodeText)
+from sqlalchemy import BigInteger
+from sqlalchemy import Boolean
+from sqlalchemy import Column
+from sqlalchemy import Integer
+from sqlalchemy import String
+from sqlalchemy import UnicodeText
 
 from tg_bot.modules.helper_funcs.msg_types import Types
-from tg_bot.modules.sql import BASE, SESSION
+from tg_bot.modules.sql import BASE
+from tg_bot.modules.sql import SESSION
 
 DEFAULT_WELCOME = "Hey {first}, how are you?"
 DEFAULT_GOODBYE = "Nice knowing ya!"

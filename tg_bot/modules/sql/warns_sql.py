@@ -1,10 +1,16 @@
 import threading
 
-from sqlalchemy import (Boolean, Column, Integer, String, UnicodeText,
-                        distinct, func)
+from sqlalchemy import Boolean
+from sqlalchemy import Column
+from sqlalchemy import distinct
+from sqlalchemy import func
+from sqlalchemy import Integer
+from sqlalchemy import String
+from sqlalchemy import UnicodeText
 from sqlalchemy.dialects import postgresql
 
-from tg_bot.modules.sql import BASE, SESSION
+from tg_bot.modules.sql import BASE
+from tg_bot.modules.sql import SESSION
 
 
 class Warns(BASE):
