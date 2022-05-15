@@ -8,8 +8,10 @@ from tg_bot.modules.sql import BASE, SESSION
 
 class Users(BASE):
     __tablename__ = "users"
-    user_id = Column(Integer, primary_key=True)
+    user_id = Column(String(16), primary_key=True)
     username = Column(UnicodeText)
+
+
 
     def __init__(self, user_id, username=None):
         self.user_id = user_id
@@ -21,7 +23,7 @@ class Users(BASE):
 
 class Chats(BASE):
     __tablename__ = "chats"
-    chat_id = Column(String(14), primary_key=True)
+    chat_id = Column(String(16), primary_key=True)
     chat_name = Column(UnicodeText, nullable=False)
 
     def __init__(self, chat_id, chat_name):
@@ -36,12 +38,12 @@ class ChatMembers(BASE):
     __tablename__ = "chat_members"
     priv_chat_id = Column(Integer, primary_key=True)
     # NOTE: Use dual primary key instead of private primary key?
-    chat = Column(String(14),
+    chat = Column(String(16),
                   ForeignKey("chats.chat_id",
                              onupdate="CASCADE",
                              ondelete="CASCADE"),
                   nullable=False)
-    user = Column(Integer,
+    user = Column(String(16),
                   ForeignKey("users.user_id",
                              onupdate="CASCADE",
                              ondelete="CASCADE"),

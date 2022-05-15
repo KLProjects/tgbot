@@ -7,8 +7,8 @@ from tg_bot.modules.sql import SESSION, BASE
 
 class Disable(BASE):
     __tablename__ = "disabled_commands"
-    chat_id = Column(String(14), primary_key=True)
-    command = Column(UnicodeText, primary_key=True)
+    chat_id = Column(String(16), primary_key=True)
+    command = Column(UnicodeText)
 
     def __init__(self, chat_id, command):
         self.chat_id = chat_id

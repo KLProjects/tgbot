@@ -7,8 +7,8 @@ from tg_bot.modules.sql import BASE, SESSION
 
 class GroupLogs(BASE):
     __tablename__ = "log_channels"
-    chat_id = Column(String(14), primary_key=True)
-    log_channel = Column(String(14), nullable=False)
+    chat_id = Column(String(16), primary_key=True)
+    log_channel = Column(String(16), nullable=False)
 
     def __init__(self, chat_id, log_channel):
         self.chat_id = str(chat_id)

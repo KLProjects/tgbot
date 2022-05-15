@@ -7,8 +7,8 @@ from tg_bot.modules.sql import BASE, SESSION
 
 class CustomFilters(BASE):
     __tablename__ = "cust_filters"
-    chat_id = Column(String(14), primary_key=True)
-    keyword = Column(UnicodeText, primary_key=True, nullable=False)
+    chat_id = Column(String(16), primary_key=True)
+    keyword = Column(UnicodeText, nullable=False)
     reply = Column(UnicodeText, nullable=False)
     is_sticker = Column(Boolean, nullable=False, default=False)
     is_document = Column(Boolean, nullable=False, default=False)
@@ -47,8 +47,8 @@ class CustomFilters(BASE):
 class Buttons(BASE):
     __tablename__ = "cust_filter_urls"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    chat_id = Column(String(14), primary_key=True)
-    keyword = Column(UnicodeText, primary_key=True)
+    chat_id = Column(String(16), primary_key=True)
+    keyword = Column(UnicodeText)
     name = Column(UnicodeText, nullable=False)
     url = Column(UnicodeText, nullable=False)
     same_line = Column(Boolean, default=False)

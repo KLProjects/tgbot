@@ -11,8 +11,8 @@ DEF_OBJ = (None, DEF_COUNT, DEF_LIMIT)
 
 class FloodControl(BASE):
     __tablename__ = "antiflood"
-    chat_id = Column(String(14), primary_key=True)
-    user_id = Column(Integer)
+    chat_id = Column(String(16), primary_key=True)
+    user_id = Column(String(20))
     count = Column(Integer, default=DEF_COUNT)
     limit = Column(Integer, default=DEF_LIMIT)
 

@@ -8,7 +8,7 @@ from tg_bot.modules.sql import SESSION, BASE
 
 class ReportingUserSettings(BASE):
     __tablename__ = "user_report_settings"
-    user_id = Column(Integer, primary_key=True)
+    user_id = Column(String(16), primary_key=True)
     should_report = Column(Boolean, default=True)
 
     def __init__(self, user_id):
@@ -20,7 +20,7 @@ class ReportingUserSettings(BASE):
 
 class ReportingChatSettings(BASE):
     __tablename__ = "chat_report_settings"
-    chat_id = Column(String(14), primary_key=True)
+    chat_id = Column(String(16), primary_key=True)
     should_report = Column(Boolean, default=True)
 
     def __init__(self, chat_id):

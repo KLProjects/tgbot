@@ -48,7 +48,7 @@ class Permissions(BASE):
 
 class Restrictions(BASE):
     __tablename__ = "restrictions"
-    chat_id = Column(String(14), primary_key=True)
+    chat_id = Column(String(16), primary_key=True)
     # Booleans are for "is this restricted", _NOT_ "is this allowed"
     messages = Column(Boolean, default=False)
     media = Column(Boolean, default=False)

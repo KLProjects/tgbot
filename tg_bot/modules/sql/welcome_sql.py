@@ -11,7 +11,7 @@ DEFAULT_GOODBYE = "Nice knowing ya!"
 
 class Welcome(BASE):
     __tablename__ = "welcome_pref"
-    chat_id = Column(String(14), primary_key=True)
+    chat_id = Column(String(16), primary_key=True)
     should_welcome = Column(Boolean, default=True)
     should_goodbye = Column(Boolean, default=True)
 
