@@ -18,9 +18,11 @@ class BlackListFilters(BASE):
         return "<Blacklist filter '%s' for %s>" % (self.trigger, self.chat_id)
 
     def __eq__(self, other):
-        return bool(isinstance(other, BlackListFilters)
-                    and self.chat_id == other.chat_id
-                    and self.trigger == other.trigger)
+        return bool(
+            isinstance(other, BlackListFilters)
+            and self.chat_id == other.chat_id
+            and self.trigger == other.trigger
+        )
 
 
 BlackListFilters.__table__.create(checkfirst=True)
@@ -41,8 +43,7 @@ def add_to_blacklist(chat_id, trigger):
 
 def rm_from_blacklist(chat_id, trigger):
     with BLACKLIST_FILTER_INSERTION_LOCK:
-        blacklist_filt = SESSION.query(
-            BlackListFilters).get((str(chat_id), trigger))
+        blacklist_filt = SESSION.query(BlackListFilters).get((str(chat_id), trigger))
         if blacklist_filt:
             # sanity check
             if trigger in CHAT_BLACKLISTS.get(str(chat_id), set()):
@@ -69,7 +70,11 @@ def num_blacklist_filters():
 
 def num_blacklist_chat_filters(chat_id):
     try:
-        return SESSION.query(BlackListFilters.chat_id).filter(BlackListFilters.chat_id == str(chat_id)).count()
+        return (
+            SESSION.query(BlackListFilters.chat_id)
+            .filter(BlackListFilters.chat_id == str(chat_id))
+            .count()
+        )
     finally:
         SESSION.close()
 
@@ -100,8 +105,11 @@ def __load_chat_blacklists():
 
 def migrate_chat(old_chat_id, new_chat_id):
     with BLACKLIST_FILTER_INSERTION_LOCK:
-        chat_filters = SESSION.query(BlackListFilters).filter(
-            BlackListFilters.chat_id == str(old_chat_id)).all()
+        chat_filters = (
+            SESSION.query(BlackListFilters)
+            .filter(BlackListFilters.chat_id == str(old_chat_id))
+            .all()
+        )
         for filt in chat_filters:
             filt.chat_id = str(new_chat_id)
         SESSION.commit()
