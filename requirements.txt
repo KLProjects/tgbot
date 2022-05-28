@@ -11,3 +11,4 @@ pillow
 numpy
 uuid==1.30
 
+httpx>=0.23.0 # not directly required, pinned by Snyk to avoid a vulnerability
